@@ -2,17 +2,28 @@ import java.awt.geom.FlatteningPathIterator;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
+import java.util.*;
 
 public class Main {
 
     protected ArrayList<TripRecord> tripRecords; // array list of trip record, for clustering
+    protected int eps;
+    protected int minPts;
 
     public Main(){
         readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
+        //inputs();
+
+    }
+
+    /**
+     * method just for taking inputs and assigning those inputted values to eps and minPts.
+     */
+    private void inputs(){
+        Scanner scan = new Scanner(System.in);
+
+        minPts = Integer.parseInt(scan.nextLine());
+        eps = Integer.parseInt(scan.nextLine());
     }
 
     /**
