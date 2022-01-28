@@ -1,13 +1,17 @@
+import java.util.ArrayList;
+
 public class Cluster {
 
     protected int id;
-    protected GPScoord pos;
-    protected int pntNum;
+    protected ArrayList<GPScoord> pntNum;
 
-    public Cluster(int id, int points, GPScoord position){
+    public Cluster(int id, ArrayList<GPScoord> points) {
         this.id = id;
         this.pntNum = points;
-        this.pos = position;
+    }
+
+    public void addGPS(GPScoord c) {
+        this.pntNum.add(c);
     }
 
     public int getId() {
@@ -15,10 +19,7 @@ public class Cluster {
     }
 
     public int getPntNum() {
-        return pntNum;
+        return pntNum.size();
     }
 
-    public GPScoord getPos() {
-        return pos;
-    }
 }
