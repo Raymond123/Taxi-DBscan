@@ -14,6 +14,10 @@ public class Cluster {
         this.pntNum.add(c);
     }
 
+    public void printClust(){
+        System.out.println(this.id + "| position" +" | " + this.pntNum.size());
+    }
+
     public int getId() {
         return id;
     }

@@ -13,19 +13,25 @@ import static java.lang.Math.round;
 public class Main {
 
     protected HashMap<TripRecord, Boolean> tripRecords; // array list of trip record, for clustering
+    protected ArrayList<Cluster> clusters;
     protected int eps;
     protected int minPts;
-    protected final float eRM = 6371;//*1000;
+    // Earths radius along its surface in KM, ( add *1000 to conver to meters )
+    protected final float eRM = 6371;
 
     public Main(){
-        //readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
+        readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
         //inputs();
-        //dbScan(this.tripRecords, 5, 10);
-        // 1.99 - -73.947828,40.787172 - -73.952943,40.76771
+        dbScan(this.tripRecords, 5, 10);
 
+        /*
         float dist = euclidDist(new GPScoord((float)-73.947828, (float)40.787172),
                                 new GPScoord((float)-73.952943, (float)40.76771));
         System.out.println(dist);
+         */
+        for (Cluster c : this.clusters){
+            c.printClust();
+        }
     }
 
     /**
@@ -67,7 +73,19 @@ public class Main {
         return ((float)(d*Math.PI/180));
     }
 
-    private String[] dbScan(HashMap<TripRecord, Boolean> db, int eps, int minPts){
+    /**
+     * Implementation of DBSCAN algorithm using HashMaps as data type for db.
+     * @param db
+     * A HashMap, with the key being the TripRecord and each value being that
+     * TripRecords/GPSCoord's visited value
+     * @param eps
+     * The maximum distance that can be between points in order for them to still be
+     * considered in the same cluster.
+     * @param minPts
+     * The minimum number of points that need to be grouped up in order for the algorithm
+     * to consider that group a cluster.
+     */
+    private void dbScan(HashMap<TripRecord, Boolean> db, int eps, int minPts){
         int c = 0;
         for (TripRecord k : db.keySet()){
             if((db.get(k))){ continue; }
@@ -75,17 +93,29 @@ public class Main {
             db.put(k, true);
             HashMap<TripRecord, Boolean> neighborPts = regionQry(k, eps, db.keySet());
             if (neighborPts.size() < minPts) {
-
+                // mark as noise
             }else{
                 expandCluster(k.pickup_Location, neighborPts,
-                        new Cluster(c, new ArrayList<>()), eps, minPts);
-                c++;
+                        new Cluster(c++, new ArrayList<>()), eps, minPts);
             }
         }
-
-        return null;
     }
 
+    /**
+     * Method for expanding and adding points to a cluster
+     * @param p
+     * Central point of cluster to expand.
+     * @param neighbours
+     * HashMap containing all neighbour points to @p
+     * @param c
+     * The specific cluster to expand/add points to
+     * @param eps
+     * The maximum distance that can be between points in order for them to still be
+     * considered in the same cluster.
+     * @param minPts
+     * The minimum number of points that need to be grouped up in order for the algorithm
+     * to consider that group a cluster.
+     */
     private void expandCluster(GPScoord p, HashMap<TripRecord, Boolean> neighbours,
                                Cluster c, int eps, int minPts) {
         c.addGPS(p);
@@ -100,6 +130,7 @@ public class Main {
 
             // if(), p not in a cluster, add it to c
         }
+        this.clusters.add(c);
     }
 
     /**
