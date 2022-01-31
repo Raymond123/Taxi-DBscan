@@ -7,10 +7,6 @@ public class GPScoord {
         this.lon = lon;
     }
 
-    public float getDistance(GPScoord p){
-        return this.lat - p.getLat();
-    }
-
     public float getLat() {
         return lat;
     }

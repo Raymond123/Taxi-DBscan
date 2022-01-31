@@ -1,34 +1,23 @@
-import javax.swing.text.StyledEditorKit;
-import java.awt.*;
-import java.awt.geom.FlatteningPathIterator;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.*;
-
-import static java.lang.Math.min;
-import static java.lang.Math.round;
-
+import java.util.List;
+@SuppressWarnings("SpellCheckingInspection")
 public class Main {
 
-    protected HashMap<TripRecord, Boolean> tripRecords; // array list of trip record, for clustering
-    protected ArrayList<Cluster> clusters;
+    protected List<TripRecord> tripRecords; // array list of trip record, for clustering
+    protected List<Cluster> clusters; // array list to store all clusters in
     protected int eps;
     protected int minPts;
-    // Earths radius along its surface in KM, ( add *1000 to conver to meters )
-    protected final float eRM = 6371;
+
+    protected int test;
 
     public Main(){
+        this.clusters = new ArrayList<>();
+
         readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
         //inputs();
-        dbScan(this.tripRecords, 5, 10);
+        dbScan(this.tripRecords, 0.0001f, 5);
 
-        /*
-        float dist = euclidDist(new GPScoord((float)-73.947828, (float)40.787172),
-                                new GPScoord((float)-73.952943, (float)40.76771));
-        System.out.println(dist);
-         */
         for (Cluster c : this.clusters){
             c.printClust();
         }
@@ -44,40 +33,19 @@ public class Main {
         this.eps = Integer.parseInt(scan.nextLine());
     }
 
-    /**
-     * computes the distance between 2 given gps coordinates using the haversine formula for calculating distances between GPS coordinates.
-     * Formula can be found here: http://www.movable-type.co.uk/scripts/latlong.html
-     * And code was referenced from here: https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
-     * @param p1
-     * first point, type GPScoord
-     * @param p2
-     * second point, type GPScoord
-     * @return
-     * flaot value that is the calculated distance between the 2 given points in meters. Can change to KM by removing the (*1000) in the eRM variable.
-     */
     private float euclidDist(GPScoord p1, GPScoord p2){
-        float dlat = degToRad(p1.getLat() - p2.getLat());
-        float dlon = degToRad(p1.getLon() - p2.getLon());
+        float x = (p2.getLat()-p1.getLat());
+        float y = (p2.getLon()-p1.getLon());
 
-        float p1Lat = degToRad(p1.getLat());
-        float p2Lat = degToRad(p2.getLat());
-
-        float a = (float) ((Math.sin(dlat/2)*Math.sin(dlat/2)) +
-                (Math.sin(dlon/2)*Math.sin(dlon/2)) * Math.cos(p1Lat) * Math.cos(p2Lat));
-        float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        //System.out.println((float) Math.sqrt((x*x)+(y*y)));
-        return (float) (eRM * c);
-    }
-
-    private float degToRad(float d){
-        return ((float)(d*Math.PI/180));
+        float dist = (x*x) + (y*y);
+        return (float) Math.sqrt(dist);
     }
 
     /**
      * Implementation of DBSCAN algorithm using HashMaps as data type for db.
      * @param db
      * A HashMap, with the key being the TripRecord and each value being that
-     * TripRecords/GPSCoord's visited value
+     * TripRecords/GPSCo-ord's visited value
      * @param eps
      * The maximum distance that can be between points in order for them to still be
      * considered in the same cluster.
@@ -85,18 +53,17 @@ public class Main {
      * The minimum number of points that need to be grouped up in order for the algorithm
      * to consider that group a cluster.
      */
-    private void dbScan(HashMap<TripRecord, Boolean> db, int eps, int minPts){
+    private void dbScan(List<TripRecord> db, float eps, int minPts){
         int c = 0;
-        for (TripRecord k : db.keySet()){
-            if((db.get(k))){ continue; }
+        for (TripRecord tr : db){
+            if(tr.getVisited()) { continue; }
 
-            db.put(k, true);
-            HashMap<TripRecord, Boolean> neighborPts = regionQry(k, eps, db.keySet());
-            if (neighborPts.size() < minPts) {
-                // mark as noise
-            }else{
-                expandCluster(k.pickup_Location, neighborPts,
-                        new Cluster(c++, new ArrayList<>()), eps, minPts);
+            tr.visit();
+            List<TripRecord> neighbours = regionQry(tr, eps);
+            if(neighbours.size() >= minPts){
+                Cluster clstr =  new Cluster(++c, tr.getPickup_Location());
+                expandCluster( tr, neighbours, clstr, eps, minPts );
+                this.clusters.add(clstr);
             }
         }
     }
@@ -106,7 +73,7 @@ public class Main {
      * @param p
      * Central point of cluster to expand.
      * @param neighbours
-     * HashMap containing all neighbour points to @p
+     * Arraylist containing all neighbour points to @p
      * @param c
      * The specific cluster to expand/add points to
      * @param eps
@@ -116,21 +83,21 @@ public class Main {
      * The minimum number of points that need to be grouped up in order for the algorithm
      * to consider that group a cluster.
      */
-    private void expandCluster(GPScoord p, HashMap<TripRecord, Boolean> neighbours,
-                               Cluster c, int eps, int minPts) {
+    private void expandCluster(TripRecord p, List<TripRecord> neighbours, Cluster c, float eps, int minPts) {
         c.addGPS(p);
-        for(TripRecord g : neighbours.keySet()){
-            if (!(neighbours.get(g))){
-                neighbours.put(g, true);
-                HashMap<TripRecord, Boolean> neighbours_p = regionQry(g, eps, neighbours.keySet());
-                if(neighbours_p.size() >= minPts){
-                    neighbours.putAll(neighbours_p);
+        int size = neighbours.size();
+        for(int i=0; i<size; i++){
+            TripRecord tr = neighbours.get(i);
+            if(!(tr.getVisited())){
+                tr.visit();
+                List<TripRecord> nPts = regionQry(tr, eps);
+                if(nPts.size() >= minPts){
+                    neighbours.addAll(nPts);
+                    size+=nPts.size();
                 }
             }
-
-            // if(), p not in a cluster, add it to c
+            if(tr.getCluster() == -1){ c.addGPS(tr); }
         }
-        this.clusters.add(c);
     }
 
     /**
@@ -144,16 +111,14 @@ public class Main {
      * @return
      * return the set of all points that are in the given eps of the point p
      */
-    private HashMap<TripRecord, Boolean> regionQry(TripRecord p, int eps, Set<TripRecord> global){
-        HashMap<TripRecord, Boolean> neighbours = new HashMap<>();
-        neighbours.put(p, true);
-        for(TripRecord n : global){
-            if( euclidDist(p.getPickup_Location(), n.getPickup_Location()) < eps){
-                neighbours.put(n, false);
+    private List<TripRecord> regionQry(TripRecord p, float eps){
+        List<TripRecord> n = new ArrayList<>();
+        for(TripRecord tr : this.tripRecords){
+            if( euclidDist(p.getPickup_Location(), tr.getPickup_Location()) <= eps ){
+                n.add(tr);
             }
         }
-
-        return neighbours;
+        return n;
     }
 
     /**
@@ -167,21 +132,20 @@ public class Main {
     private void readCSV(String f){
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
-            this.tripRecords = new HashMap<>();
+            this.tripRecords = new ArrayList<>();
             //String[] attr = br.readLine().split(",");
 
             String line;
             br.readLine(); // skips first line with attributes
             while ((line = br.readLine()) != null) {
                 String[] lineArr = line.split(",");
-                tripRecords.put(
+                tripRecords.add(
                         new TripRecord(
                                 lineArr[4], // index 4 is Trip_Pickup_DateTime
                                 new GPScoord(Float.parseFloat(lineArr[8]), Float.parseFloat(lineArr[9])), // index 8/9 is start lon/lat
                                 new GPScoord(Float.parseFloat(lineArr[12]), Float.parseFloat(lineArr[13])), // index 12/13 is end lon/lat
                                 Float.parseFloat(lineArr[7])
-                        ),
-                        false
+                        )
                 );
             }
         } catch(IOException ex){
