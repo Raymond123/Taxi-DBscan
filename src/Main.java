@@ -40,6 +40,8 @@ public class Main {
 
     /**
      * Implementation of DBSCAN algorithm using HashMaps as data type for db.
+     * -> https://cse.buffalo.edu/~jing/cse601/fa13/materials/clustering_density.pdf
+     * above is a powerpoint that includes the pseudo-code the below algorithm is based off
      * @param db
      * A HashMap, with the key being the TripRecord and each value being that
      * TripRecords/GPSCo-ord's visited value
