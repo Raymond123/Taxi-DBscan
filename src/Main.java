@@ -6,10 +6,8 @@ public class Main {
 
     protected List<TripRecord> tripRecords; // array list of trip record, for clustering
     protected List<Cluster> clusters; // array list to store all clusters in
-    protected int eps;
+    protected float eps;
     protected int minPts;
-
-    protected int test;
 
     public Main(){
         this.clusters = new ArrayList<>();
@@ -28,9 +26,8 @@ public class Main {
      */
     private void inputs(){
         Scanner scan = new Scanner(System.in);
-
-        this.minPts = Integer.parseInt(scan.nextLine());
-        this.eps = Integer.parseInt(scan.nextLine());
+        this.minPts = scan.nextInt();
+        this.eps = scan.nextFloat();
     }
 
     private float euclidDist(GPScoord p1, GPScoord p2){
@@ -60,11 +57,14 @@ public class Main {
 
             tr.visit();
             List<TripRecord> neighbours = regionQry(tr, eps);
-            if(neighbours.size() >= minPts){
-                Cluster clstr =  new Cluster(++c, tr.getPickup_Location());
-                expandCluster( tr, neighbours, clstr, eps, minPts );
-                this.clusters.add(clstr);
+            if(neighbours.size() < minPts) {
+                tr.noise();
+                continue;
             }
+            Cluster clstr =  new Cluster(++c);
+            expandCluster( tr, neighbours, clstr, eps, minPts );
+            clstr.setCenter();
+            this.clusters.add(clstr);
         }
     }
 
@@ -88,6 +88,8 @@ public class Main {
         int size = neighbours.size();
         for(int i=0; i<size; i++){
             TripRecord tr = neighbours.get(i);
+            if(tr.getCluster() == -1) c.addGPS(tr);
+
             if(!(tr.getVisited())){
                 tr.visit();
                 List<TripRecord> nPts = regionQry(tr, eps);
@@ -96,7 +98,6 @@ public class Main {
                     size+=nPts.size();
                 }
             }
-            if(tr.getCluster() == -1){ c.addGPS(tr); }
         }
     }
 
@@ -114,7 +115,7 @@ public class Main {
     private List<TripRecord> regionQry(TripRecord p, float eps){
         List<TripRecord> n = new ArrayList<>();
         for(TripRecord tr : this.tripRecords){
-            if( euclidDist(p.getPickup_Location(), tr.getPickup_Location()) <= eps ){
+            if( euclidDist(p.getPickup_Location(), tr.getPickup_Location()) <= eps && tr!=p){
                 n.add(tr);
             }
         }

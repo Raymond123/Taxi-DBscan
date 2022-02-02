@@ -6,10 +6,25 @@ public class Cluster {
     protected ArrayList<GPScoord> pntNum;
     protected GPScoord center;
 
-    public Cluster(int id, GPScoord p) {
+    public Cluster(int id) {
         this.id = id;
         this.pntNum = new ArrayList<>();
-        this.center = p;
+    }
+
+    public void setCenter(){
+        this.center = getAvgGPS();
+    }
+
+    private GPScoord getAvgGPS(){
+        float avgLat = 0f;
+        float avgLon = 0f;
+
+        for(GPScoord gps : this.pntNum){
+            avgLat+=gps.getLat();
+            avgLon+=gps.getLon();
+        }
+        int n = this.pntNum.size();
+        return new GPScoord(avgLon/n, avgLat/n);
     }
 
     public void addGPS(TripRecord p) {
@@ -18,7 +33,8 @@ public class Cluster {
     }
 
     public void printClust(){
-        System.out.println(this.id + "| " + this.center.getLon() + " | " + this.center.getLat() + " | " + this.pntNum.size());
+        System.out.printf("%d | %.10f | %.10f | %d", this.getId(), this.center.getLon(), this.center.getLat(), this.pntNum.size());
+        System.out.println();
     }
 
     public int getId() {

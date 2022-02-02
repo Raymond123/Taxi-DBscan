@@ -6,7 +6,7 @@ public class TripRecord {
     protected float trip_Distance;
 
     protected Boolean visited;
-    //protected Boolean noise;
+    protected Boolean noise;
     protected int cluster;
 
     public TripRecord(String pickup_dt, GPScoord pickup_l, GPScoord dropoff_l, float dist){
@@ -16,11 +16,11 @@ public class TripRecord {
         this.trip_Distance = dist;
 
         this.visited = false;
-        //this.noise = false;
+        this.noise = false;
         this.cluster = -1;
     }
 
-    //public void noise() {this.noise = true;}
+    public void noise() {this.noise = true;}
     public void visit() {
         this.visited = true;
     }
@@ -28,7 +28,7 @@ public class TripRecord {
         this.cluster = c;
     }
     public int getCluster() { return this.cluster; }
-    //public Boolean getNoise() { return this.noise; }
+    public Boolean getNoise() { return this.noise; }
     public Boolean getVisited() { return this.visited; }
     public float getTrip_Distance() {
         return this.trip_Distance;
