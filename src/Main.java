@@ -14,8 +14,8 @@ public class Main {
 
         readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
         //inputs();
-        dbScan(this.tripRecords, 0.0001f, 5);
-
+        //dbScan(this.tripRecords, 0.0001f, 5);
+        dbScan2(this.tripRecords, 0.0001f, 5);
         for (Cluster c : this.clusters){
             c.printClust();
         }
@@ -39,7 +39,7 @@ public class Main {
     }
 
     /**
-     * Implementation of DBSCAN algorithm using HashMaps as data type for db.
+     * Implementation of DBSCAN algorithm using ArrayList as data type for db.
      * -> https://cse.buffalo.edu/~jing/cse601/fa13/materials/clustering_density.pdf
      * above is a powerpoint that includes the pseudo-code the below algorithm is based off
      * @param db
@@ -67,6 +67,60 @@ public class Main {
             expandCluster( tr, neighbours, clstr, eps, minPts );
             clstr.setCenter();
             this.clusters.add(clstr);
+        }
+    }
+
+
+    /**
+     * Implementation of DBSCAN algorithm using ArrayList as data type for db.
+     * This version of the DBSCAN algorithm is based off the psuedo code provided in the assignment outline
+     * Main difference is the lack of expandCluster() method and the use of a label[] array
+     * @param db
+     * An ArrayList of TripRecords that was created from the data in the inputted csv file
+     * @param eps
+     * The maximum distance that can be between points in order for them to still be
+     * considered in the same cluster.
+     * @param minPts
+     * The minimum number of points that need to be grouped up in order for the algorithm
+     * to consider that group a cluster.
+     */
+    private void dbScan2(List<TripRecord> db, float eps, int minPts){
+        // do in constructor
+        int[] label = new int[db.size()];
+        int c = 0;
+        for(TripRecord p : db){
+            int i = db.indexOf(p);
+            if(label[i] != 0) continue;
+
+            List<TripRecord> n = regionQry(p, eps);
+            if(n.size() < minPts) {
+                label[i] = -1; // -1 defines noise
+                continue;
+            }
+
+            Cluster cluster = new Cluster(++c);
+            n.remove(p);
+            List<TripRecord> seedSet = n;
+            int size = seedSet.size();
+            for(int k=0; k<size; k++){
+                TripRecord q = seedSet.get(k);
+                int j = db.indexOf(q);
+
+                if(label[j] == -1) {
+                    label[j] = c;
+                    cluster.addGPS(q);
+                }
+                if(label[j] != 0) continue;
+                label[j] = c;
+                cluster.addGPS(q);
+                n = regionQry(q, eps);
+                if(n.size() >= minPts){
+                    seedSet.addAll(n);
+                    size += n.size();
+                }
+            }
+            cluster.setCenter();
+            this.clusters.add(cluster);
         }
     }
 
