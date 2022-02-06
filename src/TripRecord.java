@@ -1,7 +1,10 @@
 /**
  * @author eastonsmith
  *
- * describe class/object
+ * This class is for storing critical data from each entry read from the taxi .csv file
+ * Each entry is in reference to a specific trip the taxi made, hence the class' name.
+ * This class stores the critical information as objects, and also has access methods for each instances attributes.
+ * there are also a few methods for editing the attributes values.
  */
 public class TripRecord {
 

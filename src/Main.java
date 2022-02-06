@@ -5,7 +5,10 @@ import java.util.List;
 /**
  * @author eastonsmith
  *
- * describe class/object
+ * This is the main class for the TaxiCluster java project.
+ * In this class are all the methods relating to running the DBSCAN algorithm and a method for
+ * gathering data from a .csv file into an ArrayList for the DBSCAN algorithm.
+ *
  * -> https://cse.buffalo.edu/~jing/cse601/fa13/materials/clustering_density.pdf
  * above is a powerpoint that includes the pseudo-code my DBSCAN algorithm is based off
  */

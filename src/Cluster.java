@@ -3,7 +3,14 @@ import java.util.ArrayList;
 /**
  * @author eastonsmith
  *
- * describe class/object
+ * Creates a cluster object.
+ * Creating each cluster as a class allows for storing a List of them, which makes creating large amounts of clusters
+ * and accessing them much simpler.
+ *
+ * Each cluster instance has 3 attributes, id, an array list of all the points in the cluster, and the GPS coordinate of the
+ * center of the cluster.
+ * This class contains the necessary methods for finding the center of itself, and several access methods for accessing its
+ * attributes. There is also a specific 'print' method for printing out the details of the specific cluster instance into the console.
  */
 
 public class Cluster {

@@ -1,7 +1,9 @@
 /**
  * @author eastonsmith
  *
- * describe class/object
+ * Class/Object for storing the location of a taxi using GPS coordinates
+ * Only methods incluce the constructor and some access method.
+ * Only attributes are the latitude and longitude of the GPS coordinate being created.
  */
 public class GPScoord {
 
