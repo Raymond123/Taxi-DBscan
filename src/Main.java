@@ -1,7 +1,14 @@
 import java.io.*;
 import java.util.*;
 import java.util.List;
-@SuppressWarnings("SpellCheckingInspection")
+
+/**
+ * @author eastonsmith
+ *
+ * describe class/object
+ * -> https://cse.buffalo.edu/~jing/cse601/fa13/materials/clustering_density.pdf
+ * above is a powerpoint that includes the pseudo-code my DBSCAN algorithm is based off
+ */
 public class Main {
 
     protected List<TripRecord> tripRecords; // array list of trip record, for clustering
@@ -10,26 +17,31 @@ public class Main {
     protected int minPts;
 
     public Main(){
-        this.clusters = new ArrayList<>();
-
-        readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv");
+        this.clusters = new ArrayList<>(); //  create new arrayList of clusters
+        readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv"); // reads the data from csv in tripRecords list
         //inputs();
-        //dbScan(this.tripRecords, 0.0001f, 5);
-        dbScan2(this.tripRecords, 0.0001f, 5);
-        for (Cluster c : this.clusters){
+        dbScan(this.tripRecords, 0.0001f, 5);
+        for (Cluster c : this.clusters){ // loops through clusters arrayList and prints each one using cluster print method
             c.printClust();
         }
     }
 
-    /**
-     * method just for taking inputs and assigning those inputted values to eps and minPts.
-     */
+    // Method just for taking inputs and assigning those inputted values to eps and minPts.
     private void inputs(){
         Scanner scan = new Scanner(System.in);
         this.minPts = scan.nextInt();
         this.eps = scan.nextFloat();
     }
 
+    /**
+     * Calculates the euclidean distance between 2 points
+     * @param p1
+     * first GPS coordinate to find distance between
+     * @param p2
+     * first GPS coordinate to find distance between
+     * @return
+     * the euclidean distance between p1 and p2
+     */
     private float euclidDist(GPScoord p1, GPScoord p2){
         float x = (p2.getLat()-p1.getLat());
         float y = (p2.getLon()-p1.getLon());
@@ -39,12 +51,9 @@ public class Main {
     }
 
     /**
-     * Implementation of DBSCAN algorithm using ArrayList as data type for db.
-     * -> https://cse.buffalo.edu/~jing/cse601/fa13/materials/clustering_density.pdf
-     * above is a powerpoint that includes the pseudo-code the below algorithm is based off
+     * Implementation of DBSCAN algorithm using ArrayList as data type for containing the data points.
      * @param db
-     * A HashMap, with the key being the TripRecord and each value being that
-     * TripRecords/GPSCo-ord's visited value
+     * An ArrayList, containing all the tripRecord data points for for clusters
      * @param eps
      * The maximum distance that can be between points in order for them to still be
      * considered in the same cluster.
@@ -67,60 +76,6 @@ public class Main {
             expandCluster( tr, neighbours, clstr, eps, minPts );
             clstr.setCenter();
             this.clusters.add(clstr);
-        }
-    }
-
-
-    /**
-     * Implementation of DBSCAN algorithm using ArrayList as data type for db.
-     * This version of the DBSCAN algorithm is based off the psuedo code provided in the assignment outline
-     * Main difference is the lack of expandCluster() method and the use of a label[] array
-     * @param db
-     * An ArrayList of TripRecords that was created from the data in the inputted csv file
-     * @param eps
-     * The maximum distance that can be between points in order for them to still be
-     * considered in the same cluster.
-     * @param minPts
-     * The minimum number of points that need to be grouped up in order for the algorithm
-     * to consider that group a cluster.
-     */
-    private void dbScan2(List<TripRecord> db, float eps, int minPts){
-        // do in constructor
-        int[] label = new int[db.size()];
-        int c = 0;
-        for(TripRecord p : db){
-            int i = db.indexOf(p);
-            if(label[i] != 0) continue;
-
-            List<TripRecord> n = regionQry(p, eps);
-            if(n.size() < minPts) {
-                label[i] = -1; // -1 defines noise
-                continue;
-            }
-
-            Cluster cluster = new Cluster(++c);
-            n.remove(p);
-            List<TripRecord> seedSet = n;
-            int size = seedSet.size();
-            for(int k=0; k<size; k++){
-                TripRecord q = seedSet.get(k);
-                int j = db.indexOf(q);
-
-                if(label[j] == -1) {
-                    label[j] = c;
-                    cluster.addGPS(q);
-                }
-                if(label[j] != 0) continue;
-                label[j] = c;
-                cluster.addGPS(q);
-                n = regionQry(q, eps);
-                if(n.size() >= minPts){
-                    seedSet.addAll(n);
-                    size += n.size();
-                }
-            }
-            cluster.setCenter();
-            this.clusters.add(cluster);
         }
     }
 
@@ -159,14 +114,13 @@ public class Main {
 
     /**
      * Method to find all the points around a central point, p, that are within
-     * a given distance, eps, and returns them as a set/array
-     *
+     * a given distance, eps, and returns them as a list
      * @param p
      * A point to be at the center of the region
      * @param eps
      * Maximum distance that can be between p and another point for that point to be in the region
      * @return
-     * return the set of all points that are in the given eps of the point p
+     * return the set of all points that are in the given eps of the point p in a list
      */
     private List<TripRecord> regionQry(TripRecord p, float eps){
         List<TripRecord> n = new ArrayList<>();
@@ -181,8 +135,7 @@ public class Main {
     /**
      * Method reads a csv file into an array list,
      * each element in the array list is a row from the csv file
-     * each element in the arrays in the list are the columns from the csv file
-     *
+     * each element in the arrays in the list are the columns from the csv fil
      * @param f
      * File path for the csv file that is to be read
      */
@@ -210,6 +163,7 @@ public class Main {
         }
     }
 
+    // Class' main method for executing the program
     public static void main(String[] args) {
         new Main();
     }
