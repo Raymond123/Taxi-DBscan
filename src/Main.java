@@ -21,18 +21,14 @@ public class Main {
 
     public Main(){
         this.clusters = new ArrayList<>(); //  create new arrayList of clusters
-        readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv"); // reads the data from csv in tripRecords list
-        //inputs();
-        dbScan(this.tripRecords, 0.0001f, 5);
-        for (Cluster c : this.clusters){ // loops through clusters arrayList and prints each one using cluster print method
-            c.printClust();
-        }
     }
 
     // Method just for taking inputs and assigning those inputted values to eps and minPts.
     private void inputs(){
         Scanner scan = new Scanner(System.in);
+        System.out.println("Input minPts: ");
         this.minPts = scan.nextInt();
+        System.out.println("Input Epsilon: ");
         this.eps = scan.nextFloat();
     }
 
@@ -166,9 +162,35 @@ public class Main {
         }
     }
 
+    private void writeCSV(){
+        try{
+            BufferedWriter bw = new BufferedWriter(
+                    new FileWriter(
+                            String.format("out/TaxiClusterOut-%.5f-%d.csv", this.eps, this.minPts),
+                            true
+                    ));
+
+
+            for(Cluster c : clusters){
+                bw.write(c.printClust());
+                System.out.println(c.printClust());
+                bw.newLine();
+            }
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Class' main method for executing the program
     public static void main(String[] args) {
-        new Main();
+        Main taxiCluster = new Main();
+
+        // below runs dbscan and outputs
+        taxiCluster.readCSV("data/yellow_tripdata_2009-01-15_1hour_clean.csv"); // reads the data from csv in tripRecords list
+        taxiCluster.inputs();
+        taxiCluster.dbScan(taxiCluster.tripRecords, taxiCluster.eps, taxiCluster.minPts);
+        taxiCluster.writeCSV();
     }
 
 }

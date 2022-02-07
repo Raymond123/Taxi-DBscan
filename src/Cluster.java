@@ -61,10 +61,11 @@ public class Cluster {
         p.inCluster(this.id);
     }
 
-    // Prints the cluster in the format (id | longitude | latitude | size)
-    public void printClust(){
-        System.out.printf("%d | %.10f | %.10f | %d", this.getId(), this.center.getLon(), this.center.getLat(), this.pntNum.size());
-        System.out.println();
+    // returns formatted string of cluster in csv format - (id,longitude,latitude,size)
+    public String printClust(){
+        return String.format(
+                "%d,%.10f,%.10f,%d", this.getId(), this.center.getLon(), this.center.getLat(), this.pntNum.size()
+        );
     }
 
     // Access methods
