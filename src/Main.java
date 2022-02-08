@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * @author eastonsmith
+ * Student # : 300189637
  *
  * This is the main class for the TaxiCluster java project.
  * In this class are all the methods relating to running the DBSCAN algorithm and a method for
@@ -52,7 +53,7 @@ public class Main {
     /**
      * Implementation of DBSCAN algorithm using ArrayList as data type for containing the data points.
      * @param db
-     * An ArrayList, containing all the tripRecord data points for for clusters
+     * An ArrayList, containing all the tripRecord data points for clusters
      * @param eps
      * The maximum distance that can be between points in order for them to still be
      * considered in the same cluster.
@@ -95,17 +96,17 @@ public class Main {
      */
     private void expandCluster(TripRecord p, List<TripRecord> neighbours, Cluster c, float eps, int minPts) {
         c.addGPS(p);
-        int size = neighbours.size();
-        for(int i=0; i<size; i++){
-            TripRecord tr = neighbours.get(i);
+        List<TripRecord> seedSet = new ArrayList<>(neighbours);
+        int i = 0;
+        while( i < seedSet.size() ){
+            TripRecord tr = seedSet.get(i++);
             if(tr.getCluster() == -1) c.addGPS(tr);
 
             if(!(tr.getVisited())){
                 tr.visit();
                 List<TripRecord> nPts = regionQry(tr, eps);
                 if(nPts.size() >= minPts){
-                    neighbours.addAll(nPts);
-                    size+=nPts.size();
+                    seedSet.addAll(nPts);
                 }
             }
         }
@@ -153,7 +154,7 @@ public class Main {
                                 lineArr[4], // index 4 is Trip_Pickup_DateTime
                                 new GPScoord(Float.parseFloat(lineArr[8]), Float.parseFloat(lineArr[9])), // index 8/9 is start lon/lat
                                 new GPScoord(Float.parseFloat(lineArr[12]), Float.parseFloat(lineArr[13])), // index 12/13 is end lon/lat
-                                Float.parseFloat(lineArr[7])
+                                Float.parseFloat(lineArr[7]) // index 7 is the trip distance
                         )
                 );
             }

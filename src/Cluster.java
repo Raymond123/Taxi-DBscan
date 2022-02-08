@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 /**
  * @author eastonsmith
+ * Student # : 300189637
  *
  * Creates a cluster object.
  * Creating each cluster as a class allows for storing a List of them, which makes creating large amounts of clusters

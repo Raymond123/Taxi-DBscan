@@ -1,5 +1,6 @@
 /**
  * @author eastonsmith
+ * Student # : 300189637
  *
  * Class/Object for storing the location of a taxi using GPS coordinates
  * Only methods incluce the constructor and some access method.
